@@ -26,6 +26,6 @@ Route::post('/product_detail', 'dashboard@input');
 
 //user logout
 Route::get('logout', function(){
-  \Auth::logout();
-  return \Redirect::to('/home');
+    \Session::forget("credential");
+    return \Redirect::to('/home');
 });

@@ -21,9 +21,8 @@ class dashboard extends Controller
       // public $user;
       public function __construct()
       {
-        // $this->user = Auth::user();
-        $this->middleware('auth:web', ['only'=>['product']]);
-
+        // apply middleware "CheckIfAuthenticated"
+        $this->middleware('login', ['only'=>['product']]);
       }
 
       public function index()
@@ -54,18 +53,20 @@ class dashboard extends Controller
           'email'=>$request->email ,
           'password'=>$request->password ,
         );
-        // if (Session::put('email')) {
-        //   // code...
-        // }
-        //
-        if(\Auth::attempt($data))
-        {
-          // return redirect('product');
-          return(Auth::user());
-        }else
-        {
-              return view('failed');
-        }
+
+        // new login flow using session
+
+        $check = \App\User::where("email", $data['email'])
+                            ->first();
+
+        if(count($check) == 0) return view("failed");
+
+        $pwCheck = \Hash::check($data['password'], $check->password);
+
+        if( !$pwCheck ) return view("failed");
+
+        \Session::put("credential", $check);
+        return redirect("product");
       }
 
       public function regis()
@@ -88,7 +89,6 @@ class dashboard extends Controller
       public function product()
       {
         return view('product');
-        dd(Auth::user());
       }
 
       public function view()
